@@ -18,7 +18,7 @@ CREATE FUNCTION register() RETURNS TRIGGER AS $$
                 WHERE LimitedCourses.code = Registrations.course AND Registrations.status = 'registered' AND LimitedCourses.code = NEW.course 
                 GROUP BY LimitedCourses.code) = TRUE) THEN
 
-                INSERT INTO WaitingList VALUES(NEW.student,NEW.course);
+                INSERT INTO WaitingList VALUES(NEW.student,NEW.course, (SELECT Count(student) FROM WaitingList WHERE course = NEW.course) + 1);
 
                 RAISE NOTICE 'inserted sucessfully as waiting';
 
@@ -50,24 +50,35 @@ INSTEAD OF INSERT ON Registrations
 CREATE FUNCTION unregister() RETURNS TRIGGER AS $$
     BEGIN
 
-        IF (EXISTS (SELECT student FROM Registered,LimitedCourses WHERE student = OLD.student AND Registered.course = OLD.course AND OLD.course != LimitedCourses.code)) THEN
+        IF (EXISTS (SELECT student FROM Registered,LimitedCourses WHERE student = OLD.student AND Registered.course = OLD.course AND OLD.course IN (SELECT code FROM  LimitedCourses) = FALSE)) THEN
 			DELETE FROM Registered WHERE student = OLD.student AND course = OLD.course;
 			RAISE NOTICE 'deleted sucessfully';
 
 
-        ELSIF (EXISTS (SELECT student FROM WaitingList,LimitedCourses WHERE student = OLD.student AND WaitingList.course = OLD.course
-		AND LimitedCourses.code = OLD.course AND  WaitingList.student != OLD.student)) THEN
+        ELSE
+            IF (EXISTS (SELECT Registered.student FROM Registered,WaitingList,LimitedCourses WHERE Registered.student = OLD.student AND Registered.course = OLD.course 
+                AND LimitedCourses.code = OLD.course AND  WaitingList.student != OLD.student)) THEN
+
+            WITH studentToRegister AS (DELETE FROM WaitingList WHERE course = OLD.course AND position = 1 RETURNING student, course)
+            INSERT INTO Registered(student, course) SELECT student, course FROM studentToRegister;
+            
+            UPDATE WaitingList SET position = position - 1 WHERE course = OLD.course;
+
         	DELETE FROM Registered WHERE student = OLD.student AND course = OLD.course;
             RAISE NOTICE 'removed from registered list';
 
 
-		
-        ELSIF (EXISTS (SELECT student FROM WaitingList,LimitedCourses WHERE student = OLD.student AND WaitingList.course = OLD.course
-		AND LimitedCourses.code = OLD.course AND  WaitingList.student = OLD.student)) THEN
-        	DELETE FROM Registered WHERE student = OLD.student AND course = OLD.course;
-            DELETE FROM WaitingList WHERE student = OLD.student AND course = OLD.course;
-            RAISE NOTICE 'removed from waiting list';
+    		
+            ELSIF (EXISTS (SELECT student FROM WaitingList,LimitedCourses WHERE student = OLD.student AND WaitingList.course = OLD.course
+    		AND LimitedCourses.code = OLD.course AND  WaitingList.student = OLD.student)) THEN
+            	DELETE FROM Registered WHERE student = OLD.student AND course = OLD.course;
 
+
+
+                DELETE FROM WaitingList WHERE student = OLD.student AND course = OLD.course;
+                RAISE NOTICE 'removed from waiting list';
+
+            END IF;
 
         /*
         ELSE

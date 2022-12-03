@@ -156,7 +156,7 @@ CREATE TABLE Taken(
 CREATE TABLE WaitingList(
 	student CHAR(10) NOT NULL,
 	course TEXT NOT NULL,
-	position SERIAL NOT NULL,
+	position INT NOT NULL,
 	PRIMARY KEY (student, course),
 	UNIQUE(course,position),
 	UNIQUE(course,student),

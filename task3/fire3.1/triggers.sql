@@ -59,10 +59,10 @@ CREATE FUNCTION unregister() RETURNS TRIGGER AS $$
             IF (EXISTS (SELECT Registered.student FROM Registered,WaitingList,LimitedCourses WHERE Registered.student = OLD.student AND Registered.course = OLD.course 
                 AND LimitedCourses.code = OLD.course AND  WaitingList.student != OLD.student)) THEN
 
-            WITH studentToRegister AS (DELETE FROM WaitingList WHERE course = OLD.course AND position = 1 RETURNING student, course)
+            WITH studentToRegister AS (DELETE FROM WaitingList WHERE course = OLD.course AND place = 1 RETURNING student, course)
             INSERT INTO Registered(student, course) SELECT student, course FROM studentToRegister;
             
-            UPDATE WaitingList SET position = position - 1 WHERE course = OLD.course;
+            UPDATE WaitingList SET place = place - 1 WHERE course = OLD.course;
 
         	DELETE FROM Registered WHERE student = OLD.student AND course = OLD.course;
             RAISE NOTICE 'removed from registered list';

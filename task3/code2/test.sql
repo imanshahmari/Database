@@ -10,6 +10,8 @@ INSERT INTO Prerequisites VALUES('CCC111','CCC222');
 INSERT INTO Prerequisites VALUES('CCC333','CCC444');
 
 
+
+
 SELECT * FROM Registrations ORDER BY course;
 
 --TEST IF INSERT WORKS

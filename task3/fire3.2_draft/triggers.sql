@@ -7,14 +7,14 @@ CREATE FUNCTION register() RETURNS TRIGGER AS $$
         IF (EXISTS (SELECT student FROM Registered WHERE student = NEW.student AND Registered.course = NEW.course)
             OR EXISTS(SELECT student FROM PassedCourses WHERE student = NEW.student AND PassedCourses.course = NEW.course)
             ) THEN
-			RAISE EXCEPTION 'student already registered or is waiting in that course';
+            RAISE EXCEPTION 'STUDENT ALREADY REGISTERED OR IS WAITING IN THAT COURSE';
 
         ELSIF (NOT EXISTS(SELECT PassedCourses.student
             FROM PassedCourses,Prerequisites
             WHERE Prerequisites.prerequisiteCourse = PassedCourses.course AND Prerequisites.course = NEW.Course AND PassedCourses.student = NEW.student OR
             NOT EXISTS( SELECT course FROM Prerequisites WHERE NEW.course = course))
             ) THEN
-            RAISE EXCEPTION 'Prerequisites doesnt match';
+            RAISE EXCEPTION 'PREREQUISITES DOESNT MATCH';
         ELSE
             IF ((SELECT COUNT(*) >= LimitedCourses.capacity FROM LimitedCourses,Registrations 
                 WHERE LimitedCourses.code = Registrations.course AND Registrations.status = 'registered' AND LimitedCourses.code = NEW.course 
@@ -22,13 +22,13 @@ CREATE FUNCTION register() RETURNS TRIGGER AS $$
 
                 INSERT INTO WaitingList VALUES(NEW.student,NEW.course, (SELECT Count(student) FROM WaitingList WHERE course = NEW.course) + 1);
 
-                RAISE NOTICE 'inserted sucessfully as waiting';
+                RAISE NOTICE 'INSERTED SUCESSFULLY AS WAITING';
 
             ELSE
 
             	INSERT INTO Registered VALUES(NEW.student,NEW.course);
             	--RETURN NEW;
-            	RAISE NOTICE 'inserted sucessfully as registered';
+            	RAISE NOTICE 'INSERTED SUCESSFULLY AS REGISTERE';
 
 
             END IF;
@@ -49,10 +49,13 @@ INSTEAD OF INSERT ON Registrations
 
 CREATE FUNCTION unregister() RETURNS TRIGGER AS $$
     BEGIN
+        IF(NOT EXISTS(SELECT student FROM Registrations WHERE student = OLD.student AND OLD.course = Registrations.course)) THEN
+            RAISE EXCEPTION 'NO STUDENT TO UNREGISTER';
 
-        IF (EXISTS (SELECT student FROM Registered,LimitedCourses WHERE student = OLD.student AND Registered.course = OLD.course AND OLD.course IN (SELECT code FROM  LimitedCourses) = FALSE)) THEN
+
+        ELSEIF (EXISTS (SELECT student FROM Registered,LimitedCourses WHERE student = OLD.student AND Registered.course = OLD.course AND OLD.course IN (SELECT code FROM  LimitedCourses) = FALSE)) THEN
 			DELETE FROM Registered WHERE student = OLD.student AND course = OLD.course;
-			RAISE NOTICE 'deleted sucessfully';
+			RAISE NOTICE 'DELETED SUCESSFULLY';
 
 
         ELSE
@@ -65,7 +68,7 @@ CREATE FUNCTION unregister() RETURNS TRIGGER AS $$
             UPDATE WaitingList SET position = position - 1 WHERE course = OLD.course;
 
         	DELETE FROM Registered WHERE student = OLD.student AND course = OLD.course;
-            RAISE NOTICE 'removed from registered list';
+            RAISE NOTICE 'REMOVED FROM REGISTERED LIST';
 
 
     		
@@ -76,7 +79,7 @@ CREATE FUNCTION unregister() RETURNS TRIGGER AS $$
 
 
                 DELETE FROM WaitingList WHERE student = OLD.student AND course = OLD.course;
-                RAISE NOTICE 'removed from waiting list';
+                RAISE NOTICE 'REMOVED FROM WAITINGLIST';
 
             END IF;
 

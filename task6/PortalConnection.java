@@ -48,6 +48,19 @@ public class PortalConnection {
         }
     }
 
+
+    public String register_direct(String student, String courseCode){
+        String query = "INSERT INTO Registered VALUES(?,?);";
+        try(PreparedStatement st = conn.prepareStatement(query)){
+            st.setString(1, student);
+            st.setString(2, courseCode);
+            int rowsInserted = st.executeUpdate();
+            return "{\"success\":true, \"rowsInserted\":" + rowsInserted + "}";
+        } catch (SQLException e) {
+            return "{\"success\":false, \"error\":\"" + getError(e) + "\"}";
+        }
+    }
+
     // Unregister a student from a course, returns a tiny JSON document (as a String)
     public String unregister(String student, String courseCode){
         String query = "DELETE FROM Registrations WHERE student=? AND course=?";
@@ -65,6 +78,23 @@ public class PortalConnection {
         }
     }
 
+
+    public String SQLinjection(String student, String courseCode){
+        String query = "DELETE FROM Registered WHERE student = ? AND course = ?;";
+        try(PreparedStatement st = conn.prepareStatement(query)){
+            st.setString(1, student);
+            st.setString(2, courseCode);
+            int rowsInserted = st.executeUpdate();
+            return "{\"success\":true, \"rowsDeleted\":" + rowsInserted + "}";
+        } catch (SQLException e) {
+            return "{\"success\":false, \"error\":\"" + getError(e) + "\"}";
+        }
+    }
+
+
+
+
+
     // Return a JSON document containing lots of information about a student, it should validate against the schema found in information_schema.json
     public String getInfo(String student) throws SQLException{
 
@@ -79,12 +109,12 @@ public class PortalConnection {
 +"                b AS (SELECT * FROM BasicInformation WHERE idnr = ?),"
 
 +"                f AS (SELECT jsonb_agg(json_build_object('course',Courses.name,'code',Taken.course,'credits',Courses.credits,'grade',Taken.grade)) AS finished"
-+"                      FROM Taken,Courses WHERE student = '4444444444' AND Courses.code = Taken.course),"
++"                      FROM Taken,Courses WHERE student = ? AND Courses.code = Taken.course),"
 
 +"                r AS (SELECT jsonb_agg(json_build_object('course',Courses.name, 'code',Courses.code, 'status', status, 'position', place)) AS registered"
 +"                        FROM Registrations NATURAL LEFT OUTER JOIN WaitingList, Courses "
-+"                        WHERE Registrations.course = Courses.code and Registrations.student = '2222222222'),"
-+"                p AS (SELECT * FROM PathToGraduation WHERE student = '2222222222')"
++"                        WHERE Registrations.course = Courses.code and Registrations.student = ?),"
++"                p AS (SELECT * FROM PathToGraduation WHERE student = ?)"
 
 +"                SELECT jsonb_build_object('student',idnr,'name',name,'login', login , 'program',program,'branch', branch, 'finished' , f.finished, 'registered' , r.registered ,"
 +"                'seminarCourses', p.seminarcourses, 'mathCredits', p.mathcredits, 'researchCredits', p.researchcredits, 'totalCredits', p.totalcredits, 'canGraduate', p.qualified) AS jsondata"
@@ -97,6 +127,9 @@ public class PortalConnection {
         );){
 
             st.setString(1, student);
+            st.setString(2, student);
+            st.setString(3, student);
+            st.setString(4, student);
             //st.setString(2, student);
 
             ResultSet rs = st.executeQuery();

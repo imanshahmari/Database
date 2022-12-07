@@ -34,7 +34,7 @@ INSERT INTO Registrations VALUES('6666666666','CCC888');
 INSERT INTO Registrations VALUES('1111111111','CCC777');
 INSERT INTO Registrations VALUES('5555555555','CCC888');
 INSERT INTO Registrations VALUES('2222222222','CCC888');
-2
+
 --Waiting for limited course
 INSERT INTO Registrations VALUES('4444444444','CCC888');
 
@@ -51,7 +51,14 @@ DELETE FROM Registrations WHERE student = '1111111111' AND course = 'CCC777';
 DELETE FROM Registrations WHERE student = '1111111111' AND course = 'CCC333';
 
 --Unregistered from overfull course with waiting list
-DELETE FROM Registrations WHERE student = '3333333333' AND course = 'CCC888';
+
+INSERT INTO Registrations VALUES('1111111111','CCC777');
+INSERT INTO Registrations VALUES('2222222222','CCC777');
+INSERT INTO Registrations VALUES('3333333333','CCC777');
+
+INSERT INTO Registered VALUES('4444444444','CCC777');
+
+DELETE FROM Registrations WHERE student = '1111111111' AND course = 'CCC777';
 
 --Student has already passed course
 INSERT INTO Registrations VALUES('4444444444','CCC111');
@@ -65,13 +72,5 @@ INSERT INTO Registrations VALUES('6666666666','CCC222');
 --Student has not read all prerequired courses
 INSERT INTO Registrations VALUES('6666666666','CCC999');
 
-
-INSERT INTO Registrations VALUES('2222222222','CCC777');
-INSERT INTO Registrations VALUES('3333333333','CCC777');
-INSERT INTO Registrations VALUES('4444444444','CCC777');
-INSERT INTO Registrations VALUES('5555555555','CCC777');
-INSERT INTO Registrations VALUES('1111111111','CCC777');
-INSERT INTO Registrations VALUES('6666666666','CCC777');
-
 --Unregistered from limited course with waiting list and update the list
-DELETE FROM Registrations WHERE student = '5555555555' AND course = 'CCC777';
+DELETE FROM Registrations WHERE student = '2222222222' AND course = 'CCC888';

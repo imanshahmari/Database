@@ -80,5 +80,5 @@ SeminarCourses AS
 (SELECT student, seminarcourses  FROM SeminarCoursesHelper)
 */
 SELECT * FROM LimitedCourses;
-SELECT * FROM Registered;
+SELECT * FROM Registrations;
 SELECT * FROM WaitingList;

@@ -70,7 +70,7 @@ public class PortalConnection {
             int nr_deleted_rows = st.executeUpdate();
             if(nr_deleted_rows== 0)
                 return "{\"success\":false,"
-                        + " \"error\":\"" +"The student is not registered or wating." + "\"}";
+                        + " \"error\":\"" +"THE STUDENT IS NOT REGISTERED OR WAITING." + "\"}";
             else
                 return "{\"success\":true, \"rowsDeleted\":" + nr_deleted_rows + "}";
         } catch (SQLException e) {
@@ -80,12 +80,10 @@ public class PortalConnection {
 
 
     public String SQLinjection(String student, String courseCode){
-        String query = "DELETE FROM Registered WHERE student = ? AND course = ?;";
+        String query = "DELETE FROM Registrations WHERE student='" + student + "'AND course='" +courseCode+"'";
         try(PreparedStatement st = conn.prepareStatement(query)){
-            st.setString(1, student);
-            st.setString(2, courseCode);
-            int rowsInserted = st.executeUpdate();
-            return "{\"success\":true, \"rowsDeleted\":" + rowsInserted + "}";
+            int rowsDeleted = st.executeUpdate();
+            return "{\"success\":true, \"rowsDeleted\":" + rowsDeleted + "}";
         } catch (SQLException e) {
             return "{\"success\":false, \"error\":\"" + getError(e) + "\"}";
         }

@@ -58,33 +58,17 @@ public class TestPortal {
 
 
             System.out.println("Unregister a student from an overfull course, i.e. one with more students registered than there are places on the course (you need to set this situation up in the database directly). Check that no student was moved from the queue to being registered as a result");
-            System.out.println(c.register_direct("1111111111", "CCC777"));
+            System.out.println(c.register_direct("5555555555", "CCC777"));
             pause();
 
             System.out.println("Unregister a student from an overfull course, i.e. one with more students registered than there are places on the course (you need to set this situation up in the database directly). Check that no student was moved from the queue to being registered as a result");
-            System.out.println(c.unregister("1111111111", "CCC777"));
+            System.out.println(c.unregister("5555555555", "CCC777"));
             pause();
 
 
             System.out.println("Unregister with the SQL injection you introduced, causing all (or almost all?) registrations to disappear");
-            System.out.println(c.SQLinjection("1111111111", "CCC777' OR 'a' = 'a"));
+            System.out.println(c.SQLinjection("1111111111", "CCC222' OR 'a'='a"));
             pause();
-
-
-            /*
-
-            System.out.println(c.unregister("2222222222", "CCC333"));
-            pause();
-
-            prettyPrint(c.getInfo("2222222222"));
-            pause();
-
-            System.out.println(c.register("2222222222", "CCC333"));
-             */
-
-
-
-
 
 
         } catch (ClassNotFoundException e) {
